@@ -26,9 +26,6 @@
 <main class="room">
   <div class="machine">
     <!-- light thrown up from the carriage onto the active line -->
-    <div class="cone" id="cone" aria-hidden="true"></div>
-    <div class="glow" id="glow" aria-hidden="true"></div>
-
     <div class="paper-wrap">
       <div class="paper" id="paper">
         <textarea id="editor" class="editor" spellcheck="false"
@@ -36,6 +33,10 @@
         <!-- the roll: paper curving into the platen -->
         <div class="roll" aria-hidden="true"></div>
         <div class="edge" aria-hidden="true"></div>
+      </div>
+      <div class="light-layer" aria-hidden="true">
+        <div class="cone" id="cone"></div>
+        <div class="glow" id="glow"></div>
       </div>
       <div class="shadow" aria-hidden="true"></div>
     </div>

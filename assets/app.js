@@ -163,10 +163,11 @@
     glow.style.left = m.x + 'px';
     glow.style.top = m.y + 'px';
 
-    // the cone starts at the carriage and opens up to that line
-    const platenTop = platenEl ? platenEl.offsetTop : ed.offsetTop + ed.clientHeight;
+    // the beam runs from the line down to the bottom of the sheet, where the
+    // paper disappears into the platen — the layer clips it there
+    const sheetH = paper.clientHeight;
     const top = Math.max(0, m.y + m.lh * 0.4);
-    const h = Math.max(0, platenTop - top + 6);
+    const h = Math.max(0, sheetH - top);
     cone.style.left = m.x + 'px';
     cone.style.top = top + 'px';
     cone.style.height = h + 'px';
