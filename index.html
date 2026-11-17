@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Typewriter Mode — the sound of writing</title>
-<meta name="description" content="A writing surface with a typewriter mode: synthesised key clacks, a margin bell, a carriage return, and a caret that stays where your eye does. No samples, no dependencies.">
-<meta name="theme-color" content="#12100c">
-<meta property="og:title" content="Typewriter Mode — the sound of writing">
-<meta property="og:description" content="Nostalgia as a feedback loop: every keystroke synthesised in the browser, a bell at the margin, a carriage return at the line.">
+<title>Typewriter Mode — a machine, not a text box</title>
+<meta name="description" content="A writing surface built as a machine: A4 paper curved over a platen, a carriage that tracks the caret and throws light on the line you are typing. Synthesised clacks, margin bell, carriage return.">
+<meta name="theme-color" content="#0b0906">
+<meta property="og:title" content="Typewriter Mode — a machine, not a text box">
+<meta property="og:description" content="Paper over a platen, a carriage that follows the caret, warm light on the line being typed. All sound synthesised, no assets.">
 <meta property="og:type" content="website">
 <link rel="canonical" href="https://vishnuvsdevtech.github.io/typewriter-mode/">
 <link rel="stylesheet" href="assets/app.css">
@@ -17,22 +17,42 @@
 <header class="bar">
   <div class="brand"><i></i><span>TYPEWRITER MODE</span></div>
   <div class="right">
-    <span class="hint-hide" id="modeHint">click, then write</span>
-    <button class="toggle" id="soundBtn" aria-pressed="true" title="Toggle sound">sound on</button>
-    <button class="toggle" id="modeBtn" aria-pressed="true" title="Toggle typewriter / modern">typewriter</button>
+    <span class="hint-hide" id="modeHint">click the paper, then write</span>
+    <button class="toggle" id="soundBtn" aria-pressed="true">sound on</button>
+    <button class="toggle" id="modeBtn" aria-pressed="true">machine</button>
   </div>
 </header>
 
-<main class="desk">
-  <div class="sheet" id="sheet">
-    <textarea id="editor" class="editor" spellcheck="false"
-      placeholder="Begin anywhere. The first line is the hardest; after that the machine does the work."></textarea>
+<main class="room">
+  <div class="machine">
+    <!-- light thrown up from the carriage onto the active line -->
+    <div class="glow" id="glow" aria-hidden="true"></div>
+
+    <div class="paper-wrap">
+      <div class="paper" id="paper">
+        <textarea id="editor" class="editor" spellcheck="false"
+          placeholder="Begin anywhere."></textarea>
+        <!-- the roll: paper curving into the platen -->
+        <div class="roll" aria-hidden="true"></div>
+        <div class="edge" aria-hidden="true"></div>
+      </div>
+      <div class="shadow" aria-hidden="true"></div>
+    </div>
+
+    <!-- platen + carriage assembly -->
+    <div class="platen" aria-hidden="true">
+      <span class="knob left"></span>
+      <span class="roller"></span>
+      <span class="carriage" id="carriage"><i class="lamp"></i></span>
+      <span class="knob right"></span>
+    </div>
+    <div class="deck" aria-hidden="true"></div>
   </div>
 </main>
 
 <footer class="foot">
   <span><b id="words">0</b> words · <b id="chars">0</b> chars</span>
-  <span class="hint" id="hint">autosaved locally · ⌘/Ctrl+S to file</span>
+  <span class="hint" id="hint">autosaved · ⌘/Ctrl+S to file</span>
 </footer>
 
 <div class="note" id="note"></div>

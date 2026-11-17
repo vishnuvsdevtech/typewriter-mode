@@ -11,6 +11,10 @@
   const modeBtn = document.getElementById('modeBtn');
   const soundBtn = document.getElementById('soundBtn');
   const note = document.getElementById('note');
+  const carriage = document.getElementById('carriage');
+  const glow = document.getElementById('glow');
+  const paper = document.getElementById('paper');
+  let probeCtx = null;
   const wordsEl = document.getElementById('words');
   const charsEl = document.getElementById('chars');
 
@@ -48,6 +52,7 @@
 
   function setMode(on, quiet) {
     typewriterMode = on;
+    if (!on) { glow.classList.remove('on'); lightOn = false; }
     document.body.classList.toggle('mode-modern', !on);
     modeBtn.setAttribute('aria-pressed', String(on));
     modeBtn.textContent = on ? 'typewriter' : 'modern';
@@ -56,7 +61,7 @@
       tw.clack('space');
       say(on ? 'Typewriter mode — clacks, bell, carriage return' : 'Modern mode — silence');
     }
-    if (on) keepCaret();
+    if (on) { keepCaret(); updateLight(); }
   }
 
   /* A typewriter bell warns before the margin, so the threshold has to be the
@@ -112,6 +117,58 @@
     ed.scrollTop = Math.max(0, Math.min(target, ed.scrollHeight - ed.clientHeight));
   }
 
+  /* ------------------------------------------------- carriage + light rig
+   * The carriage rides the column, the lamp throws a cone up onto the active
+   * line. Position is derived from the caret, not from the scroll container, so
+   * it stays correct while the text scrolls under the platen.
+   */
+  function charWidth() {
+    const cs = getComputedStyle(ed);
+    if (!probeCtx) probeCtx = document.createElement('canvas').getContext('2d');
+    probeCtx.font = `${cs.fontSize} ${cs.fontFamily}`;
+    return probeCtx.measureText('M').width || parseFloat(cs.fontSize) * 0.6;
+  }
+
+  function caretMetrics() {
+    const cs = getComputedStyle(ed);
+    const lh = parseFloat(cs.lineHeight) || 30;
+    const padL = parseFloat(cs.paddingLeft) || 0;
+    const padT = parseFloat(cs.paddingTop) || 0;
+    const cw = charWidth();
+    const before = ed.value.slice(0, ed.selectionStart);
+    const nl = before.lastIndexOf('\n');
+    const col = before.length - (nl + 1);
+    const lineIdx = (before.match(/\n/g) || []).length;
+    const maxX = ed.clientWidth - (parseFloat(cs.paddingRight) || 0) - cw;
+    return {
+      x: Math.min(padL + col * cw, maxX),
+      y: padT + lineIdx * lh - ed.scrollTop,
+      lh,
+    };
+  }
+
+  let lightOn = false;
+
+  function updateLight() {
+    if (!typewriterMode) { glow.classList.remove('on'); return; }
+    const m = caretMetrics();
+    // carriage sits on the platen rail, offset by the rail's inset
+    carriage.style.transform = `translateX(${m.x - 13}px)`;
+    glow.style.left = m.x + 'px';
+    glow.style.top = (m.y - 96) + 'px';
+    if (!lightOn && (ed.value.length || document.activeElement === ed)) {
+      glow.classList.add('on');
+      lightOn = true;
+    }
+  }
+
+  function feedPaper() {
+    if (!typewriterMode) return;
+    paper.classList.remove('feed');
+    void paper.offsetWidth;          // restart the animation
+    paper.classList.add('feed');
+  }
+
   /* ------------------------------------------------------------ key logic */
   function columnOfCaret() {
     const upto = ed.value.slice(0, ed.selectionStart);
@@ -121,6 +178,13 @@
 
   ed.addEventListener('keydown', (e) => {
     ensureAudio();
+    if (e.key === 'Enter') {
+      carriage.classList.add('returning');       // the carriage slams back
+      setTimeout(() => carriage.classList.remove('returning'), 320);
+      feedPaper();
+    } else {
+      carriage.classList.remove('returning');
+    }
     if (e.metaKey || e.ctrlKey) {
       if (e.key.toLowerCase() === 's') { e.preventDefault(); exportTxt(); return; }
       return;
@@ -147,7 +211,7 @@
         stats.clacks++;
       }
     }
-    requestAnimationFrame(() => { count(); keepCaret(); });
+    requestAnimationFrame(() => { count(); keepCaret(); updateLight(); });
   });
 
   // every keystroke that changes the text, including IME and paste
@@ -155,7 +219,11 @@
     count();
     save();
     keepCaret();
+    updateLight();
   });
+  ed.addEventListener('scroll', updateLight, { passive: true });
+  ed.addEventListener('focus', updateLight);
+  ed.addEventListener('keyup', updateLight);
 
   /* --------------------------------------------------------------- export */
   function exportTxt() {
@@ -185,5 +253,6 @@
 
   restore();
   measureCapacity();
+  updateLight();
   setTimeout(() => say('Synthesised in the browser — no audio files. Sound starts on your first key.'), 900);
 })();

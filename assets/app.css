@@ -1,6 +1,6 @@
 :root{
-  --paper:#efe7d6; --paper-2:#e6ddc9; --ink:#22201b; --ink-soft:#575248;
-  --rule:rgba(34,32,27,.14); --accent:#a4472c; --shadow:rgba(60,45,20,.22);
+  --paper:#f3ead6; --paper-2:#e8dcc2; --ink:#211f1a; --ink-soft:#5a5448;
+  --room:#0a0907; --accent:#c2622f; --lamp:#ffb765;
   --mono:'Courier Prime',ui-monospace,'Courier New',monospace;
   --sans:'Inter',ui-sans-serif,system-ui,-apple-system,sans-serif;
   --serif:'Iowan Old Style','Palatino Linotype',Georgia,serif;
@@ -8,112 +8,253 @@
 *{box-sizing:border-box}
 html,body{height:100%;margin:0}
 body{
-  background:#12100c; color:var(--ink); font-family:var(--serif);
-  display:flex; flex-direction:column; align-items:center;
-  transition:background .5s ease;
+  background:var(--room); color:var(--ink); font-family:var(--serif);
+  display:flex; flex-direction:column; align-items:center; overflow:hidden;
+  transition:background .6s ease;
+}
+/* ---------------- room lighting: one warm pool, everything else falls off */
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(70% 55% at 50% 42%, rgba(255,183,101,.16), rgba(255,150,80,.05) 45%, transparent 72%),
+    radial-gradient(120% 90% at 50% 120%, rgba(0,0,0,.85), transparent 60%),
+    #0a0907;
 }
 body.mode-modern{ background:#0e100f; }
-
-/* ---------- top bar ---------- */
-.bar{
-  position:fixed; top:0; left:0; right:0; z-index:20;
-  display:flex; align-items:center; justify-content:space-between; gap:12px;
-  padding:12px clamp(14px,3vw,28px);
-  font-family:var(--sans); font-size:11.5px; letter-spacing:.06em;
-  color:#8b8375; text-transform:uppercase;
-  background:linear-gradient(#12100c, rgba(18,16,12,0));
-  transition:color .4s;
+body.mode-modern::before{
+  background:radial-gradient(70% 55% at 50% 30%, rgba(110,200,160,.07), transparent 70%), #0e100f;
 }
-body.mode-modern .bar{ color:#7d8478; background:linear-gradient(#0e100f, rgba(14,16,15,0)); }
-.bar .brand{display:flex; align-items:center; gap:9px; letter-spacing:.14em; color:#c9bfa9}
+
+/* ---------------- top bar ---------------- */
+.bar{
+  position:fixed; top:0; left:0; right:0; z-index:30;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:13px clamp(14px,3vw,28px);
+  font-family:var(--sans); font-size:11px; letter-spacing:.09em; text-transform:uppercase;
+  color:#8a7f6b;
+}
+.bar .brand{display:flex; align-items:center; gap:9px; letter-spacing:.16em; color:#cbbfa4}
 .bar .brand i{
-  width:7px;height:7px;border-radius:50%;background:var(--accent);
-  box-shadow:0 0 12px rgba(164,71,44,.8); display:inline-block;
+  width:7px;height:7px;border-radius:50%;background:var(--lamp);
+  box-shadow:0 0 14px rgba(255,183,101,.9); display:inline-block;
 }
 .bar .right{display:flex; align-items:center; gap:8px}
-
-.toggle,.btn{
-  font:inherit; font-size:11px; letter-spacing:.08em; text-transform:uppercase;
+.toggle{
+  font:inherit; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
   background:transparent; color:inherit; cursor:pointer;
-  border:1px solid rgba(201,191,169,.28); border-radius:999px; padding:6px 12px;
+  border:1px solid rgba(203,191,164,.22); border-radius:999px; padding:6px 12px;
   transition:border-color .2s, color .2s, background .2s;
 }
-.toggle:hover,.btn:hover{border-color:rgba(201,191,169,.6); color:#e6dcc6}
-.toggle[aria-pressed="true"]{ background:rgba(164,71,44,.16); border-color:rgba(164,71,44,.7); color:#f0d9c9 }
+.toggle:hover{border-color:rgba(203,191,164,.55); color:#efe4cc}
+.toggle[aria-pressed="true"]{ background:rgba(194,98,47,.15); border-color:rgba(194,98,47,.65); color:#f3d9c4 }
 
-/* ---------- paper ---------- */
-.desk{
-  width:100%; flex:1; display:flex; justify-content:center;
-  padding:76px 16px 40px;
+/* ---------------- the machine ---------------- */
+.room{
+  position:relative; z-index:1;
+  flex:1; width:100%; display:flex; align-items:center; justify-content:center;
+  padding:60px 16px 56px;
 }
-.sheet{
-  position:relative; width:min(720px,100%);
-  background:var(--paper);
-  box-shadow:0 30px 70px -20px var(--shadow), 0 0 0 1px rgba(0,0,0,.25);
-  border-radius:2px;
-  transition:background .5s, box-shadow .5s, width .45s;
-  overflow:hidden;
+.machine{
+  position:relative;
+  width:min(760px, 100%);
+  display:flex; flex-direction:column; align-items:center;
 }
-body.mode-modern .sheet{
-  background:#14171a; color:#dfe5e2;
-  box-shadow:0 30px 70px -20px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.07);
-  border-radius:14px;
+
+/* the sheet: A4 proportion, slight perspective so it reads as paper not a div */
+.paper-wrap{
+  position:relative; width:100%;
+  perspective:1400px; perspective-origin:50% 0%;
 }
-/* paper fibre + a lamp glow from the top */
-.sheet::before{
-  content:""; position:absolute; inset:0; pointer-events:none; opacity:.5;
+.paper{
+  position:relative;
+  background:linear-gradient(178deg, #f6efdd 0%, var(--paper) 26%, var(--paper-2) 100%);
+  border-radius:2px 2px 0 0;
+  transform:rotateX(1.6deg);
+  transform-origin:50% 0%;
+  box-shadow:
+    0 -1px 0 rgba(255,255,255,.5) inset,
+    0 2px 0 rgba(0,0,0,.06),
+    0 30px 60px -24px rgba(0,0,0,.85);
+  transition:transform .5s ease, background .55s ease;
+}
+/* paper fibre + warm falloff from the lamp */
+.paper::before{
+  content:""; position:absolute; inset:0; pointer-events:none; border-radius:inherit;
   background-image:
-    radial-gradient(circle at 30% 18%, rgba(255,246,224,.55), transparent 55%),
-    repeating-linear-gradient(0deg, rgba(120,100,60,.045) 0 1px, transparent 1px 3px);
-  mix-blend-mode:multiply;
+    radial-gradient(120% 60% at 50% 0%, rgba(255,240,205,.55), transparent 60%),
+    repeating-linear-gradient(0deg, rgba(120,95,55,.05) 0 1px, transparent 1px 3px),
+    repeating-linear-gradient(90deg, rgba(120,95,55,.03) 0 1px, transparent 1px 4px);
+  mix-blend-mode:multiply; opacity:.75;
 }
-body.mode-modern .sheet::before{opacity:.16; background-image:radial-gradient(circle at 50% -10%, rgba(120,200,170,.14), transparent 60%)}
+/* the roll: paper bending away into the platen */
+.roll{
+  position:absolute; left:0; right:0; bottom:0; height:56px; pointer-events:none;
+  border-radius:0 0 3px 3px;
+  background:linear-gradient(to top,
+    rgba(70,52,28,.42) 0%,
+    rgba(105,80,45,.20) 34%,
+    rgba(255,246,220,.28) 66%,
+    transparent 100%);
+  box-shadow:inset 0 -14px 22px -10px rgba(50,35,15,.55);
+}
+/* the crisp lip where the sheet leaves the roll */
+.edge{
+  position:absolute; left:0; right:0; bottom:-1px; height:5px; pointer-events:none;
+  background:linear-gradient(to bottom, rgba(255,255,255,.55), rgba(120,95,60,.35));
+  border-radius:0 0 3px 3px;
+}
+.shadow{
+  height:26px; margin-top:0;
+  background:radial-gradient(70% 100% at 50% 0%, rgba(0,0,0,.72), transparent 72%);
+  filter:blur(2px);
+}
 
 .editor{
-  position:relative; z-index:1;
-  width:100%; min-height:62vh; max-height:calc(100vh - 190px);
-  padding:52px clamp(22px,6vw,64px);
-  border:0; outline:0; resize:none; background:transparent;
-  color:inherit; font-family:var(--mono); font-size:16.5px; line-height:1.85;
-  letter-spacing:.01em; caret-color:var(--accent);
-  overflow-y:auto; scrollbar-width:thin;
+  position:relative; z-index:2;
+  display:block; width:100%; height:min(58vh, 560px);
+  padding:clamp(34px,5.5vh,58px) clamp(30px,7vw,78px) clamp(70px,10vh,96px);
+  border:0; outline:0; resize:none; background:transparent; color:var(--ink);
+  font-family:var(--mono); font-size:16.5px; line-height:1.95;
+  letter-spacing:.005em; caret-color:transparent;
+  overflow-y:auto; scrollbar-width:none;
+  text-shadow:0 .5px 0 rgba(35,28,18,.22);   /* letterpress bite */
+  transition:font-family .4s, color .4s, background .4s;
 }
+.editor::-webkit-scrollbar{display:none}
+.editor::placeholder{color:rgba(33,31,26,.28)}
 body.mode-modern .editor{
-  font-family:var(--sans); font-size:16px; line-height:1.8; letter-spacing:0;
-  caret-color:#7bd6a8;
+  font-family:var(--sans); font-size:16px; line-height:1.8;
+  color:#dfe5e2; text-shadow:none; caret-color:#7bd6a8;
 }
-.editor::placeholder{color:rgba(34,32,27,.32)}
-body.mode-modern .editor::placeholder{color:rgba(223,229,226,.28)}
+body.mode-modern .editor::placeholder{color:rgba(223,229,226,.26)}
 
-/* typewriter mode: the sheet keeps the caret near the middle band */
-.sheet.focus .editor{padding-top:38vh}
+/* ---------------- platen ---------------- */
+.platen{
+  position:relative; width:calc(100% + 26px); height:44px; margin-top:-4px;
+  display:flex; align-items:center; justify-content:center;
+  filter:drop-shadow(0 16px 24px rgba(0,0,0,.7));
+}
+.roller{
+  position:absolute; left:26px; right:26px; height:26px; top:9px;
+  border-radius:999px;
+  background:
+    linear-gradient(to bottom,
+      #4a443a 0%, #2b2721 22%, #191612 55%, #0f0d0a 100%);
+  box-shadow:
+    inset 0 2px 2px rgba(255,220,170,.18),
+    inset 0 -6px 10px rgba(0,0,0,.75),
+    0 2px 6px rgba(0,0,0,.6);
+}
+/* machined ridges along the roller */
+.roller::after{
+  content:""; position:absolute; inset:0; border-radius:inherit; opacity:.5;
+  background:repeating-linear-gradient(90deg, rgba(255,190,120,.09) 0 1px, transparent 1px 5px);
+}
+.knob{
+  position:absolute; top:2px; width:34px; height:38px; border-radius:7px;
+  background:linear-gradient(140deg,#5a5346,#2a251e 55%,#14110d);
+  box-shadow:inset 0 1px 1px rgba(255,220,170,.22), 0 6px 12px rgba(0,0,0,.6);
+}
+.knob.left{ left:-4px }
+.knob.right{ right:-4px }
+.knob::after{
+  content:""; position:absolute; inset:6px 9px; border-radius:3px;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,.55) 0 2px, rgba(255,220,170,.10) 2px 4px);
+}
 
-/* carriage-return paper feed */
-@keyframes feed{ from{ transform:translateY(0) } to{ transform:translateY(-0.0px) } }
+/* the carriage: rides left to right as you type */
+.carriage{
+  position:absolute; top:-6px; left:26px; width:0; height:0; z-index:3;
+  transition:transform .09s cubic-bezier(.2,.9,.2,1);
+  will-change:transform;
+}
+.carriage .lamp{
+  position:absolute; left:-7px; top:-14px;
+  width:14px; height:22px; border-radius:50% 50% 40% 40%;
+  background:radial-gradient(circle at 50% 35%, #fff2cf, #ffbe72 45%, rgba(255,150,70,.15) 75%, transparent 80%);
+  box-shadow:0 0 22px 6px rgba(255,178,92,.45), 0 0 60px 18px rgba(255,150,70,.18);
+  opacity:.95;
+}
 
-/* ---------- footer ---------- */
+/* the deck under the platen, so the machine sits on something */
+.deck{
+  width:calc(100% + 90px); height:16px; margin-top:-2px;
+  border-radius:0 0 14px 14px;
+  background:linear-gradient(to bottom, #17140f, #0b0906);
+  box-shadow:inset 0 1px 0 rgba(255,200,140,.10), 0 22px 40px -18px rgba(0,0,0,.9);
+}
+
+/* ---------------- light thrown onto the active line ---------------- */
+.glow{
+  position:absolute; z-index:1; pointer-events:none;
+  left:0; top:0; width:340px; height:260px; margin-left:-170px;
+  border-radius:50%;
+  background:radial-gradient(ellipse at 50% 88%,
+    rgba(255,196,120,.30) 0%,
+    rgba(255,170,90,.14) 32%,
+    rgba(255,150,80,.05) 58%,
+    transparent 74%);
+  filter:blur(6px);
+  mix-blend-mode:screen;
+  opacity:0; transition:opacity .25s ease;
+}
+.glow.on{ opacity:1 }
+/* a soft cone from the lamp up to the line */
+.glow::after{
+  content:""; position:absolute; left:50%; bottom:8%; width:120px; height:190px;
+  transform:translateX(-50%);
+  background:linear-gradient(to top, rgba(255,196,120,.22), rgba(255,196,120,0) 78%);
+  clip-path:polygon(46% 100%, 54% 100%, 100% 0, 0 0);
+  filter:blur(3px);
+}
+
+/* ---------------- modern mode strips the machine away ---------------- */
+body.mode-modern .platen,
+body.mode-modern .deck,
+body.mode-modern .roll,
+body.mode-modern .glow{ opacity:0; pointer-events:none; }
+body.mode-modern .paper{
+  background:#14171a; transform:none; border-radius:14px;
+  box-shadow:0 30px 70px -20px rgba(0,0,0,.75), 0 0 0 1px rgba(255,255,255,.07);
+}
+body.mode-modern .paper::before{opacity:.10}
+
+/* ---------------- footer ---------------- */
 .foot{
-  position:fixed; bottom:0; left:0; right:0; z-index:20;
+  position:fixed; bottom:0; left:0; right:0; z-index:30;
   display:flex; justify-content:space-between; align-items:center; gap:12px;
-  padding:10px clamp(14px,3vw,28px);
-  font-family:var(--sans); font-size:11px; letter-spacing:.07em;
-  text-transform:uppercase; color:#6f685d;
-  background:linear-gradient(rgba(18,16,12,0), #12100c);
+  padding:11px clamp(14px,3vw,28px);
+  font-family:var(--sans); font-size:10.5px; letter-spacing:.09em;
+  text-transform:uppercase; color:#6b6153;
 }
-body.mode-modern .foot{color:#5f6b62; background:linear-gradient(rgba(14,16,15,0), #0e100f)}
-.foot b{color:#c9bfa9; font-weight:500}
-.foot .hint{opacity:.75}
+.foot b{color:#c2b393; font-weight:500}
+.foot .hint{opacity:.7}
 
-/* toast for the honest note */
 .note{
-  position:fixed; left:50%; bottom:56px; transform:translateX(-50%) translateY(10px);
-  background:rgba(24,21,16,.94); color:#e8ddc7; border:1px solid rgba(201,191,169,.22);
+  position:fixed; left:50%; bottom:54px; transform:translateX(-50%) translateY(10px);
+  background:rgba(24,20,14,.95); color:#e9dcc2; border:1px solid rgba(203,191,164,.2);
   padding:9px 14px; border-radius:8px; font-family:var(--sans); font-size:12px;
-  opacity:0; pointer-events:none; transition:opacity .35s, transform .35s; z-index:30;
+  opacity:0; pointer-events:none; transition:opacity .35s, transform .35s; z-index:40;
 }
 .note.show{opacity:1; transform:translateX(-50%) translateY(0)}
 
 @media (max-width:640px){
-  .editor{padding:34px 20px; font-size:15.5px}
+  .editor{height:min(52vh,460px); padding:26px 22px 64px; font-size:15.5px}
   .bar .hint-hide{display:none}
+  .paper{transform:rotateX(1deg)}
 }
+@media (prefers-reduced-motion: reduce){
+  .paper,.editor,.glow,.carriage{transition:none}
+}
+
+/* paper bites into the roll on Enter */
+@keyframes feed{
+  0%{ transform:rotateX(1.6deg) translateY(0) }
+  42%{ transform:rotateX(1.6deg) translateY(8px) }
+  100%{ transform:rotateX(1.6deg) translateY(0) }
+}
+.paper.feed{ animation:feed .42s cubic-bezier(.3,.85,.3,1) }
+@media (prefers-reduced-motion: reduce){ .paper.feed{ animation:none } }
+
+/* carriage return is slower and heavier than a keystroke advance */
+.carriage.returning{ transition:transform .28s cubic-bezier(.5,0,.2,1) }
