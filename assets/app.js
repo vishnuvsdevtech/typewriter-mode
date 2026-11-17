@@ -13,6 +13,8 @@
   const note = document.getElementById('note');
   const carriage = document.getElementById('carriage');
   const glow = document.getElementById('glow');
+  const cone = document.getElementById('cone');
+  const platenEl = document.querySelector('.platen');
   const paper = document.getElementById('paper');
   let probeCtx = null;
   const wordsEl = document.getElementById('words');
@@ -52,7 +54,7 @@
 
   function setMode(on, quiet) {
     typewriterMode = on;
-    if (!on) { glow.classList.remove('on'); lightOn = false; }
+    if (!on) { glow.classList.remove('on'); cone.classList.remove('on'); lightOn = false; }
     document.body.classList.toggle('mode-modern', !on);
     modeBtn.setAttribute('aria-pressed', String(on));
     modeBtn.textContent = on ? 'typewriter' : 'modern';
@@ -150,14 +152,27 @@
   let lightOn = false;
 
   function updateLight() {
-    if (!typewriterMode) { glow.classList.remove('on'); return; }
+    if (!typewriterMode) {
+      glow.classList.remove('on'); cone.classList.remove('on');
+      return;
+    }
     const m = caretMetrics();
-    // carriage sits on the platen rail, offset by the rail's inset
+    // carriage rides the platen rail, inset by the roller's margin
     carriage.style.transform = `translateX(${m.x - 13}px)`;
+    // the pool of light sits on the line being typed
     glow.style.left = m.x + 'px';
-    glow.style.top = (m.y - 96) + 'px';
+    glow.style.top = m.y + 'px';
+
+    // the cone starts at the carriage and opens up to that line
+    const platenTop = platenEl ? platenEl.offsetTop : ed.offsetTop + ed.clientHeight;
+    const top = Math.max(0, m.y + m.lh * 0.4);
+    const h = Math.max(0, platenTop - top + 6);
+    cone.style.left = m.x + 'px';
+    cone.style.top = top + 'px';
+    cone.style.height = h + 'px';
+
     if (!lightOn && (ed.value.length || document.activeElement === ed)) {
-      glow.classList.add('on');
+      glow.classList.add('on'); cone.classList.add('on');
       lightOn = true;
     }
   }
