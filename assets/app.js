@@ -17,14 +17,14 @@
   const tw = new window.TW.Typewriter();
   const KEY = 'tw-draft-v1';
   const MODE_KEY = 'tw-mode-v1';
-  const LINE_WIDTH = 62;
+  let LINE_WIDTH = 62;   // recomputed to the real column capacity on load/resize
 
   let typewriterMode = true;
   let bellRung = false;
   let linesBell = 0;
 
   const stats = { clacks: 0, bells: 0, carriages: 0, keys: 0 };
-  window.__tw = { stats, ready: false, audio: null };
+  window.__tw = { stats, ready: false, audio: null, capacity: () => LINE_WIDTH };
 
   /* ---------------------------------------------------------------- toast */
   let noteTimer = 0;
@@ -57,6 +57,19 @@
       say(on ? 'Typewriter mode — clacks, bell, carriage return' : 'Modern mode — silence');
     }
     if (on) keepCaret();
+  }
+
+  /* A typewriter bell warns before the margin, so the threshold has to be the
+     REAL column capacity of this sheet at this font size — a hardcoded 62 rang
+     after the visual line had already wrapped. */
+  function measureCapacity() {
+    const cs = getComputedStyle(ed);
+    const probe = document.createElement('canvas').getContext('2d');
+    probe.font = `${cs.fontSize} ${cs.fontFamily}`;
+    const charW = probe.measureText('M').width || parseFloat(cs.fontSize) * 0.6;
+    const usable = ed.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    LINE_WIDTH = Math.max(24, Math.floor(usable / charW) - 2);
+    return LINE_WIDTH;
   }
 
   function count() {
@@ -168,8 +181,9 @@
   document.addEventListener('pointerdown', ensureAudio, { once: true });
 
   ed.addEventListener('click', keepCaret);
-  window.addEventListener('resize', keepCaret, { passive: true });
+  window.addEventListener('resize', () => { keepCaret(); measureCapacity(); }, { passive: true });
 
   restore();
+  measureCapacity();
   setTimeout(() => say('Synthesised in the browser — no audio files. Sound starts on your first key.'), 900);
 })();
